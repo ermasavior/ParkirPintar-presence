@@ -95,7 +95,7 @@ func TestCalculateAndCreateInvoice_CircuitOpen_DoesNotCallDownstream(t *testing.
 	c := newWithCaller(countingCaller)
 
 	for i := 0; i < 5; i++ {
-		c.CalculateAndCreateInvoice(context.Background(),
+		_, _ = c.CalculateAndCreateInvoice(context.Background(),
 			testSessionID, testReservationID, testDriverID,
 			time.Now().Add(-2*time.Hour), time.Now())
 	}
