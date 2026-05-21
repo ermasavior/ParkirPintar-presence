@@ -9,13 +9,21 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-// RegisterGRPC wires up the presence domain and registers it on the gRPC server
-func RegisterGRPC(grpcServer *grpc.Server, db *pgxpool.Pool, bc billingclient.BillingService) {
+type Service struct {
+	uc usecase.Presence
+}
+
+func New(db *pgxpool.Pool, bc billingclient.BillingService) *Service {
 	repo := repository.NewPresence(db)
 	uc := usecase.NewPresence(repo, bc)
-	srv := handler.NewPresenceServer(uc)
+	return &Service{uc: uc}
+}
 
+func (s *Service) RegisterGRPC(grpcServer *grpc.Server) {
+	srv := handler.NewPresenceServer(s.uc)
 	pb.RegisterPresenceServiceServer(grpcServer, srv)
+	reflection.Register(grpcServer)
 }

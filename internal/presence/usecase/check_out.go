@@ -27,6 +27,11 @@ func (u *PresenceUsecase) CheckOut(ctx context.Context, req model.CheckOutReques
 		checkedOutAt = time.Now()
 	}
 
+	// Validate checkout time is after check-in time
+	if !checkedOutAt.After(session.CheckedInAt) {
+		return nil, apperror.New("validation_error", "checked_out_at must be after checked_in_at")
+	}
+
 	if appErr := u.repo.CompleteCheckOut(ctx, session.ID, session.SpotID, session.ReservationID, checkedOutAt); appErr != nil {
 		return nil, appErr
 	}

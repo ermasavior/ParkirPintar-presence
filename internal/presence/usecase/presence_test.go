@@ -396,3 +396,28 @@ func TestCheckOut_ZeroCheckedOutAt_UsesNow(t *testing.T) {
 	require.Nil(t, appErr)
 	assert.Equal(t, testSessionID, res.SessionID)
 }
+
+func TestCheckOut_CheckedOutBeforeCheckedIn(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	now := time.Now()
+
+	repo := mockpresence.NewMockPresenceRepository(ctrl)
+	repo.EXPECT().GetSessionForCheckOut(gomock.Any(), testSessionID, testDriverID).
+		Return(&model.Session{
+			ID:          testSessionID,
+			Status:      model.SessionStatusActive,
+			CheckedInAt: now,
+		}, nil)
+
+	_, appErr := newUsecase(repo, ctrl).CheckOut(context.Background(), model.CheckOutRequest{
+		SessionID:    testSessionID,
+		DriverID:     testDriverID,
+		CheckedOutAt: now.Add(-1 * time.Hour), // before check-in
+	})
+
+	require.NotNil(t, appErr)
+	assert.Equal(t, "validation_error", appErr.ErrorCode)
+	assert.Contains(t, appErr.Message, "after checked_in_at")
+}

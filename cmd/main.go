@@ -64,6 +64,9 @@ func main() {
 	}
 	logger.Info(ctx, "billing service client created", slog.String("target", billingServiceURL))
 
+	// Presence domain
+	svc := presence.New(pool, bc)
+
 	// gRPC server
 	port := dotenv.GetEnv("APP_PORT", "8085")
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
@@ -75,7 +78,7 @@ func main() {
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
-	presence.RegisterGRPC(grpcServer, pool, bc)
+	svc.RegisterGRPC(grpcServer)
 
 	go func() {
 		logger.Info(ctx, "presence service starting", slog.String("port", port))
