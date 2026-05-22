@@ -51,7 +51,7 @@ func TestNew_WiresBillingClientIntoUsecase(t *testing.T) {
 
 	require.NotNil(t, svc)
 	assert.NotNil(t, svc.uc)
-	_ = bc // bc is available for future integration-level assertions
+	_ = bc // bc is available for future e2e-level assertions
 }
 
 // ── RegisterGRPC ──────────────────────────────────────────────────────────────

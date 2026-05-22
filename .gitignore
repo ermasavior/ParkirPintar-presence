@@ -31,6 +31,7 @@ go.work
 # Environment files
 .env
 .env.docker
+.env.e2e
 cmd/http/assets/*
 
 # Log files
